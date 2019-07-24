@@ -4,7 +4,7 @@
 
 * IP Address: 54.85.17.85
 * Accessible SSH port: 2200
-* Application URL: [http://54.85.17.85.xip.io/]()
+* Application URL: [http://54.85.17.85.xip.io/](http://54.85.17.85.xip.io/)
 
 ## Instruction to configure the server
 
@@ -66,7 +66,7 @@ $ sudo nano /etc/ssh/sshd_config
 
 * Find the `PermitRootLogin` line and edit it to `PermitRootLogin no`.
 
-* Save the file and run
+* Save the file and run:
 
 ```
 $ sudo service ssh restart
@@ -183,7 +183,7 @@ $ sudo nano /etc/apache2/sites-available/FlaskApp.conf
 </VirtualHost>
 ```
 
-* Enable the virtual host sudo `a2ensite catalog`
+* Enable the virtual host sudo `sudo a2ensite FlaskApp`
 
 17. **Install and configure PostgreSQL**
 
@@ -219,10 +219,16 @@ $ python /var/www/catalog/catalog/menus.py
     host    all             all             ::1/128                 md5
   ```
 
-  20. **Restart Apache**
+  * **Restart Apache**
 
   ```
   $ sudo service apache2 restart
   ```
 
   ### Now open your brouser and visit to [http://54.85.17.85.xip.io/]()
+
+  # Refrence
+
+  * Digital Oceans: [How To Deploy a Flask Application on an Ubuntu VPS](https://www.digitalocean.com/community/tutorials/how-to-deploy-a-flask-application-on-an-ubuntu-vps)
+
+  * Aws: [Connecting to Your Linux Instance Using SSH](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html)
