@@ -82,3 +82,147 @@ $ sudo ufw allow www
 $ sudo ufw allow 123/udp
 $ sudo ufw enable
 ```
+
+8. **Install Apache**
+
+```
+$ sudo apt-get install apache2
+```
+
+9. **Install mod_wsgi | Enable mod_wsg | Start the web server**
+
+```
+$ sudo apt-get install libapache2-mod-wsgi python-dev
+$ sudo a2enmod wsgi
+$ sudo service apache2 start
+```
+
+10. **Clone the Item Catalog app from Github**
+
+```
+$ sudo apt-get install git
+$ cd /var/www
+$ sudo mkdir FlaskApp
+$ sudo chown -R grader:grader FlaskApp
+$ cd /FlaskApp
+$ git clone https://github.com/UddeshJain/item_catalog.git FlaskApp
+```
+
+11. **Create a flaskapp.wsgi**
+
+```
+$ cd /var/www/FlaskApp
+sudo nano flaskapp.wsgi
+```
+
+* Add following lines
+
+```python
+#!/usr/bin/python
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0,"/var/www/FlaskApp/")
+
+from FlaskApp import app as application
+application.secret_key = 'super_secret_key'
+```
+
+12. **Rename `project.py` to `__init__.py`**
+
+```
+$ mv application.py __init__.py
+```
+
+13. **Install virtual environment**
+
+```
+$ sudo pip install virtualenv
+$ sudo virtualenv venv
+$ source venv/bin/activate
+$ sudo chmod -R 777 venv
+```
+
+14. **Install Flask and other required dependencies**
+
+```
+$ sudo apt-get install python-pip
+$ pip install Flask
+$ sudo pip install httplib2 oauth2client sqlalchemy psycopg2 sqlalchemy_utils
+```
+
+15. **Update path for `client_secrets.json` file in `__init__.py`**
+
+* From `client_secrets.json` to `/var/www/FlaskApp/FlaskApp/client_secrets.json`
+
+16. **Create Apache configuration file**
+
+```
+$ sudo nano /etc/apache2/sites-available/FlaskApp.conf
+```
+
+* Paste this code
+
+```apache
+<VirtualHost *:80>
+		ServerName 54.85.17.85.xip.io
+		ServerAdmin admin@uddesh.com
+		WSGIScriptAlias / /var/www/FlaskApp/flaskapp.wsgi
+		<Directory /var/www/FlaskApp/FlaskApp/>
+			Order allow,deny
+			Allow from all
+		</Directory>
+		Alias /static /var/www/FlaskApp/FlaskApp/static
+		<Directory /var/www/FlaskApp/FlaskApp/static/>
+			Order allow,deny
+			Allow from all
+		</Directory>
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+		LogLevel warn
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+* Enable the virtual host sudo `a2ensite catalog`
+
+17. **Install and configure PostgreSQL**
+
+```
+$ sudo apt-get install libpq-dev python-dev
+$ sudo apt-get install postgresql postgresql-contrib
+$ sudo su - postgres
+$ psql
+$ CREATE USER catalog WITH PASSWORD 'password';
+$ ALTER USER catalog CREATEDB;
+$ CREATE DATABASE catalog WITH OWNER catalog;
+$ \c catalog
+$ REVOKE ALL ON SCHEMA public FROM public;
+$ GRANT ALL ON SCHEMA public TO catalog;
+$ \q
+$ exit
+```
+
+18. **Change create engine line in `__init__.py`, `database_setup.py`, `menus.py` to:** `engine = create_engine('postgresql://catalog:password@localhost/catalog')`
+
+19. **Run `database_setup.py` and `menus.py`**
+
+```
+$ python /var/www/catalog/catalog/database_setup.py
+$ python /var/www/catalog/catalog/menus.py
+```
+
+* Make sure no remote connections to the database are allowed. Check if the contents of this file `sudo nano /etc/postgresql/9.3/main/pg_hba.conf` looks like this:
+  ```
+    local   all             postgres                                peer
+    local   all             all                                     peer
+    host    all             all             127.0.0.1/32            md5
+    host    all             all             ::1/128                 md5
+  ```
+
+  20. **Restart Apache**
+
+  ```
+  $ sudo service apache2 restart
+  ```
+
+  ### Now open your brouser and visit to [http://54.85.17.85.xip.io/]()
