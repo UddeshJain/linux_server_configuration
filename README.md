@@ -53,3 +53,32 @@ $ nano .ssh/authorized_keys
 ```
 
 * Paste the content of Public key (aws_key.pub) created on local machine.
+
+6. **Change SSH port from 22 to 2200 | Enforce key-based authentication | Disable login for root user**
+
+```
+$ sudo nano /etc/ssh/sshd_config
+```
+
+* Find the line `Port 22` and chnge it to `Port 2200`
+
+* Find the `PasswordAuthentication` line and edit it to `PasswordAuthentication no`.
+
+* Find the `PermitRootLogin` line and edit it to `PermitRootLogin no`.
+
+* Save the file and run
+
+```
+$ sudo service ssh restart
+```
+
+7. **To Configure the Uncomplicated Firewall (UFW) run following commands**
+
+```
+$ sudo ufw default deny incoming
+$ sudo ufw default allow outgoing
+$ sudo ufw allow 2200/tcp
+$ sudo ufw allow www
+$ sudo ufw allow 123/udp
+$ sudo ufw enable
+```
